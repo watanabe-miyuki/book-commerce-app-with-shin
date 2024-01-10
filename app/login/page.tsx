@@ -11,7 +11,7 @@ function Login() {
 
   useEffect(() => {
     getProviders().then((res) => {
-      console.log(res);
+      // console.log(res);
       setProviders(res);
     });
   }, []);

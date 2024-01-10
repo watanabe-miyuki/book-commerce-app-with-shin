@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { BookType } from "../types/types";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
@@ -9,14 +8,43 @@ import { useRouter } from "next/navigation";
 
 type BookProps = {
   book: BookType;
+  isPurchased: boolean;
 };
 
 // eslint-disable-next-line react/display-name
-const Book = ({ book }: BookProps) => {
+const Book = ({ book, isPurchased }: BookProps) => {
+  // console.log(isPurchased);
   const [showModal, setShowModal] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
-  const user = session?.user;
+  const user: any = session?.user;
+
+  const startCheckout = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: book.title,
+            price: book.price,
+            userId: user?.id,
+            bookId: book.id,
+          }),
+        }
+      );
+      const responseData = await response.json();
+      // console.log(responseData);
+      if (responseData) {
+        router.push(responseData.checkout_url);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // useStateをつかときはuse clientをつける
   const handleCancel = () => {
@@ -25,20 +53,26 @@ const Book = ({ book }: BookProps) => {
   };
 
   const handlePurchaseClick = () => {
-    setShowModal(true);
+    if (isPurchased) {
+      alert("すでに購入済みです");
+    } else {
+      setShowModal(true);
+    }
+
     console.log("purchase");
   };
 
   const handlePurchaseConfirm = () => {
-    if(!user){
+    if (!user) {
       setShowModal(false);
       // ログインページへリダイレクト
       router.push("/login");
-    }else{
+    } else {
       // 購入処理
     }
     console.log("confirm");
-  }
+    startCheckout();
+  };
 
   return (
     <>
@@ -83,7 +117,10 @@ const Book = ({ book }: BookProps) => {
           <div className="absolute top-0 left-0 right-0 bottom-0 bg-slate-900 bg-opacity-50 flex justify-center items-center modal">
             <div className="bg-white p-8 rounded-lg">
               <h3 className="text-xl mb-4">本を購入しますか？</h3>
-              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">
+              <button
+                onClick={handlePurchaseConfirm}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4"
+              >
                 購入する
               </button>
               <button

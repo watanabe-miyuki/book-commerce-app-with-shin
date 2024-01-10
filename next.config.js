@@ -11,7 +11,8 @@ const nextConfig = {
                 hostname: "images.microcms-assets.io",
             }
         ]
-    }
+    },
+    reactStrictMode: false,
 }
 
 module.exports = nextConfig

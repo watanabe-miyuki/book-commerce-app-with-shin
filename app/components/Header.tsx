@@ -1,13 +1,16 @@
-"use client";
+// "use client";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { nextAuthOptions } from "../lib/next-auth/options";
+import { getServerSession } from "next-auth";
 
-const Header = () => {
-  const { data: session } = useSession();
+const Header = async () => {
+  const session = await getServerSession(nextAuthOptions);
+
   const user = session?.user;
-  console.log(user);
+  // console.log(user);
   return (
     <header className="bg-slate-600 text-gray-100 shadow-lg">
       <nav className="flex items-center justify-between p-4">
@@ -22,19 +25,25 @@ const Header = () => {
             ホーム
           </Link>
           <Link
-            href="/login"
+            href={user ? "/profile" : "/api/auth/signin"}
             className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
           >
             {user ? "プロフィール" : "ログイン"}
           </Link>
           {user ? (
-            <button onClick={() => signOut({ callbackUrl: "/login" })}>
+            <Link
+              href="/api/auth/signout"
+              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+              // onClick={() => signOut({ callbackUrl: "/login" })}
+            >
               ログアウト
-            </button>
+            </Link>
           ) : (
             ""
           )}
           <Link href={`/profile`}>
+            {/* use client だと 画像取得に時間がかかるのでSSGにする。その際、ログアウトのonclickが使えなくなった */}
+            {/* 最新懸念点: サーバーコンポーネント使いたいけど、その代わりにonclickが使えない..←面倒くさい部分 */}
             <Image
               width={50}
               height={50}

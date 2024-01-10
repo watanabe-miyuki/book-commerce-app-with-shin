@@ -3,6 +3,8 @@ import { Noto_Sans_JP } from 'next/font/google'
 import './globals.css'
 import Header from './components/Header'
 import { NextAuthProvider } from './lib/next-auth/provider'
+import { Suspense } from 'react'
+import Loading from './loading'
 // import { SessionProvider } from 'next-auth/react'
 
 const notoSansJP = Noto_Sans_JP({ subsets: ['latin'], weight: ['400'] })
@@ -25,7 +27,9 @@ export default function RootLayout({
         {/* providerはclientサイドに置きたいがlayoutに直で置くとすべてclientサイドになるのでコンポーネント化する */}
         <NextAuthProvider>
         <Header />
+        <Suspense fallback={<Loading />}>
         {children}
+        </Suspense>
         </NextAuthProvider>
         </body>
     </html>
